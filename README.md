@@ -6,7 +6,7 @@ Este trabalho consiste na construção e utilização de estrutura hierárquica 
 
 A figura a seguir exemplifica a organização de um arquivo de dicionário. Cada linha apresenta a definição de uma palavra, sendo composta, no início, pela própria palavra com todos os caracteres em minúsculo (somente entre 'a' (97) e 'z' (122) da tabela ASCII) e envolvida por colchetes, seguida pelo texto de seu significado. Não há símbolos especiais, acentuação, cedilha, etc, no arquivo.
 
-![Trie](trie.png)
+![Trie](trie.jpeg)
 
 Materiais
 
