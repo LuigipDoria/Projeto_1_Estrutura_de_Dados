@@ -1,78 +1,62 @@
-# Projeto_1_Estrutura_de_Dados
-
 Objetivo
 
-Este trabalho consiste na construção e utilização de estrutura hierárquica denominada trie (do inglês "retrieval", sendo também conhecida como árvore de prefixos ou ainda árvore digital) para a indexação e recuperação eficiente de palavras em grandes arquivos de dicionários (mantidos em memória secundária). A implementação deverá resolver dois problemas (listados a seguir), e os resultados deverão ser formatados em saída padrão de tela de modo que possam ser automaticamente avaliados no VPL.
+Este projeto consiste na utilização de estruturas lineares, vistas até o momento no curso, e aplicação de conceitos de pilha e/ou fila para o processamento de arquivos XML contendo imagens binárias. A implementação deverá resolver dois problemas (listados a seguir), e os resultados deverão ser formatados em saída padrão de tela de modo que possam ser automaticamente avaliados no VPL.
 
-A figura a seguir exemplifica a organização de um arquivo de dicionário. Cada linha apresenta a definição de uma palavra, sendo composta, no início, pela própria palavra com todos os caracteres em minúsculo (somente entre 'a' (97) e 'z' (122) da tabela ASCII) e envolvida por colchetes, seguida pelo texto de seu significado. Não há símbolos especiais, acentuação, cedilha, etc, no arquivo.
-
-![Trie](trie.jpeg)
+* Entradas:
+    * datasets.zip
+* Saídas textuais esperadas:
+    * t1-saidas.pdf
+* Dica:
+    * utilize "avaliar" (e não "executar") para que as entradas sejam automaticamente carregadas
 
 Materiais
 
-De modo a exemplificar as entradas para o seu programa, seguem os arquivos de dicionário utilizados nos testes:
+* De modo a exemplificar uma entrada para o seu programa, segue o arquivo XML utilizado no primeiro teste:
+    * dataset01.xml
 
-dicionario1.dic
-dicionario2.dic
+* dataset02.xml, dataset03.xml, dataset04.xml, dataset05.xml, dataset06.xml
 
-Primeiro problema: identificação de prefixos
+* dicas sobre leitura e escrita com arquivos em C++
+    * http://www.cplusplus.com/doc/tutorial/files/
 
-Construir a trie, em memória principal, a partir das palavras (definidas entre colchetes) de um arquivo de dicionário, conforme o exemplo acima. A partir deste ponto, a aplicação deverá receber uma série de palavras quaisquer (pertencentes ou não ao dicionário) e responder se trata de um prefixo (a mensagem 'P is prefix of N words' deve ser produzida, onde P é o nome da palavra e N é a quantidade de palavras) ou não (a mensagem 'P is not prefix' deve ser produzida na saída padrão). Sugestão de nó da trie:
+para a criação e concatenação de palavras/caracteres, sugere-se o uso da classe string:
 
-```
-NoTrie {
-    char           letra;        //opcional
-    NoTrie        *filhos[26];   //pode ser uma 'LinkedList' de ponteiros
-    unsigned long  posição;
-    unsigned long  comprimento;  //se maior que zero, indica último caracter de uma palavra
-}
-```
+http://www.cplusplus.com/reference/string/string/
 
-Segundo problema: indexação de arquivo de dicionário
+Primeiro problema: validação de arquivo XML
 
-A construção da trie deve considerar a localização da palavra no arquivo e o tamanho da linha que a define. Para isto, ao criar o nó correspondente ao último caracter da palavra, deve-se atribuir a posição do caracter inicial (incluindo o abre-colchetes '['), seguida pelo comprimento da linha (não inclui o caracter de mudança de linha) na qual esta palavra foi definida no arquivo de dicionário. Caso a palavra recebida pela aplicação exista no dicionário, estes dois inteiros devem ser determinados. Importante: uma palavra existente no dicionário também pode ser prefixo de outra; neste caso, o caracter final da palavra será encontrado em um nó não-folha da trie e duas linhas deverão ser produzidas na saída padrão, a mensagem 'P is prefix of N words' na primeira linha, e 'P is in (D,C)' na linha seguinte (sendo D a posição, e C o comprimento).
+Para esta parte, pede-se exclusivamente a verificação de aninhamento e fechamento das marcações (tags) no arquivo XML (qualquer outra fonte de erro pode ser ignorada). Um identificador (por exemplo: img) constitui uma marcação entre os caracteres < e >, podendo ser de abertura (por exemplo: <img>) ou de fechamento com uma / antes do identificador (por exemplo: </img>). Como apresentando em sala de aula, o algoritmo para resolver este problema é baseado em pilha (LIFO):
 
-Exemplo:
+* Ao encontrar uma marcação de abertura, empilha o identificador
+* Ao encontrar uma marcação de fechamento, verifica se o topo da pilha tem o mesmo identificador e desempilha. Aqui duas situações de erro podem ocorrer:
+    * Ao consultar o topo, o identificador é diferente (ou seja, uma marcação aberta deveria ter sido fechada antes)
+    * Ao consultar o topo, a pilha encontra-se vazia (ou seja, uma marcação é fechada sem que tenha sido aberta antes)
+* Ao finalizar a análise (parser) do arquivo, é necessário que a pilha esteja vazia. Caso não esteja, mais uma situação de erro ocorre, ou seja, há marcação sem fechamento
 
-Segue uma entrada possível para a aplicação, exatamente como configurada no VPL, contendo o nome do arquivo de dicionário a ser considerado, cuja a trie deve ser construída (no caso para 'dicionario1.dic' da figura acima), e uma sequência de palavras, separadas por um espaço em branco e finalizada por '0' (zero); e a saída que deve ser produzida neste caso.
+Segundo problema: contagem de componentes conexos em imagens binárias representadas em arquivo XML
 
-Entrada:
+Cada XML, contém imagens binárias, com altura e largura, definidas respectivamente pelas marcações <height> e <width>, e sequência dos pixels (com valores binários, de intensidade 0 para preto ou 1 para branco), em modo texto (embora fosse melhor gravar 1 byte a cada 8 bits, optou-se pelo modo texto por simplicidade), na marcação <data>. Para cada uma dessas imagens, pretende-se calcular o número de componentes conexos usando vizinhança-4. Para isso, seguem algumas definições importantes:
 
-```
-dicionario1.dic bear bell bid bu bull buy but sell stock stop 0
-```
+* A vizinhança-4 de um pixel na linha x e coluna y, ou seja, na coordenada (x,y), é um conjunto de pixels adjacentes nas coordenadas:
+    * (x-1, y)
+    * (x+1, y)
+    * (x, y-1)
+    * (x, y+1)
+* Um caminho entre um um pixel p1 e outro pn é em um sequência de pixels distintos <p1,p2,...,pn>, de modo que pi é vizinho-4 de pi+1., sendo i=1,2,...,n-1
+* Um pixel p é conexo a um pixel q se existir um caminho de p a q (no contexto deste trabalho, só há interesse em pixels com intensidade 1, ou seja, brancos)
+* Um componente conexo é um conjunto maximal (não há outro maior que o contenha) C de pixels, no qual quaisquer dois pixels selecionados deste conjunto C são conexos
+* Para a determinação da quantidade de componentes conexos, antes é necessário atribuir um rótulo inteiro e crescente (1, 2, ...) para cada pixel de cada componente conexo. Conforme apresentado em aula, segue o algoritmo de rotulação (labeling) usando uma fila (FIFO):
 
-Saída:
-
-```
-bear is prefix of 1 words
-bear is at (0,149)
-bell is prefix of 1 words
-bell is at (150,122)
-bid is prefix of 1 words
-bid is at (273,82)
-bu is prefix of 2 words
-bull is prefix of 1 words
-bull is at (356,113)
-buy is prefix of 1 words
-buy is at (470,67)
-but is not prefix
-sell is prefix of 1 words
-sell is at (538,97)
-stock is prefix of 1 words
-stock is at (636,79)
-stop is prefix of 1 words
-stop is at (716,92)
-```
-
-Entrega e composição de notas
-
-Entrega individual ou em dupla
-Identificação de autoria no código e no relatório;
-Em sendo necessário, uma arguição individual pode ser requisitada;
-Entregas de grupos diferentes com conteúdo similar podem ser desconsideradas.
-Composição da nota:
-Nota automática do VPL(*): 70%
-(*) Caso algum caso de teste não tenha sido bem sucedido, o aluno opcionalmente poderá solicitar uma defesa de sua implementação em um dia reservado a laboratório (quarta ou quinta).
-O presente relatório em PDF com todas as explicações pertinentes (**): 30%
-(**) Recomenda-se a entrega do relatório, mesmo que a implementação não tenha sido bem sucedida.
+* Inicializar rótulo com 1
+* Criar uma matriz R de zeros com o mesmo tamanho da matriz de entrada E lida
+* Varrer a matriz de entrada E
+    * Assim que encontrar o primeiro pixel de intensidade 1 ainda não visitado (igual a 0 na mesma coordenada em R)
+        * inserir (x,y) na fila
+            * na coordenada (x,y) da imagem R, atribuir o rótulo atual
+    * Enquanto a fila não estiver vazia
+        * (x,y) ← remover da fila
+        *inserir na fila as coordenadas dos quatro vizinhos que estejam dentro do domínio da imagem (não pode ter coordenada negativa ou superar o número de linhas ou de colunas), com intensidade 1 (em E) e ainda não tenha sido visitado (igual a 0 em R)
+        * na coordenada de cada vizinho selecionado, na imagem R, atribuir o rótulo atual
+    * incrementar o rótulo
+    
+O conteúdo final da matriz R corresponde ao resultado da rotulação. A quantidade de componentes conexos, que é a resposta do segundo problema, é igual ao último e maior rótulo atribuído.
